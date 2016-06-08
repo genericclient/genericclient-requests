@@ -1,6 +1,7 @@
 A generic client for RESTful APIs
 
 ::
+
     $ pip install genericclient
 
 Usage::
