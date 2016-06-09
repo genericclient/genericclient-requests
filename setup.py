@@ -9,7 +9,7 @@ readme = f.read()
 f.close()
 
 setup(
-    name='genericclinet',
+    name='genericclient',
     version=VERSION,
     description='',
     long_description=readme,
