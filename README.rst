@@ -112,7 +112,7 @@ All endpoints methods (with the exception of ``.delete()``) return either a
 A ``Resource`` is just a wrapping class for a ``dict``, where keys can be accessed
 as properties.
 
-Additionally, ``Resource``s have a special property called ``.payload``, which
+Additionally, ``Resource`` s have a special property called ``.payload``, which
 contains the original payload received from the server.
 
 ``Resource``s have the following methods:
