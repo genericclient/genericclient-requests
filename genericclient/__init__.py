@@ -7,6 +7,12 @@ _version = "0.0.2"
 __version__ = VERSION = tuple(map(int, _version.split('.')))
 
 
+MultipleResourcesFound = exceptions.MultipleResourcesFound
+ResourceNotFound = exceptions.ResourceNotFound
+HTTPError = exceptions.HTTPError
+NotAuthenticatedError = exceptions.NotAuthenticatedError
+
+
 class Resource(object):
     whitelist = (
         '__class__',
@@ -120,7 +126,7 @@ class Endpoint(object):
         return self.create(payload)
 
     def delete(self, pk):
-        url = "{}{}/".format(self.url, pk)
+        url = "{}{}{}".format(self.url, pk, self.trail)
 
         response = self.request('delete', url)
 
@@ -142,6 +148,11 @@ class Endpoint(object):
 
 class GenericClient(object):
     endpoint_class = Endpoint
+
+    MultipleResourcesFound = MultipleResourcesFound
+    ResourceNotFound = ResourceNotFound
+    HTTPError = HTTPError
+    NotAuthenticatedError = NotAuthenticatedError
 
     def __init__(self, url, auth=None, adapter=None, trailing_slash=False):
         self.session = requests.session()
