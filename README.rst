@@ -85,7 +85,7 @@ Note that ``.get()`` will return a ``Resource``, not a list of ``Resource``s
 Will result in a ``POST``, with ``payload`` (a ``dict``) as the request's body,
 returning a new ``Resource``::
 
-    bloguser = myclient.posts.create({'blog': 12, 'status': 1})  # POST /posts/
+    post = myclient.posts.create({'blog': 12, 'status': 1})  # POST /posts/
 
 ``.create_or_update(payload)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -93,7 +93,7 @@ returning a new ``Resource``::
 If ``payload`` contains a key called ``'id'``, will issue a ``PUT``, otherwise
 it will call ``.create``::
 
-    bloguser = myclient.posts.create_or_update({'id': 1234, 'status': 1})  # PUT /posts/1234/
+    post = myclient.posts.create_or_update({'id': 1234, 'status': 1})  # PUT /posts/1234/
 
 
 ``.delete(pk)``
@@ -120,15 +120,15 @@ contains the original payload received from the server.
 ``Resource.delete()`` will result in a ``DELETE``, with ``Resource.id`` as
 par of the URL::
 
-    bloguser = myclient.posts.create({'blog': 12, 'status': 1})  # POST /posts/
-    bloguser.delete()  # DELETE /bloguser/345/ -- the ID 345 was returned by the server in the previous response
+    blog = myclient.posts.create({'blog': 12, 'status': 1})  # POST /posts/
+    blog.delete()  # DELETE /blog/345/ -- the ID 345 was returned by the server in the previous response
 
 ``Resource.save()`` will result in a ``PUT``, with ``Resource.id`` as
 par of the URL::
 
-    bloguser = myclient.posts.create({'blog': 12, 'status': 1})  # POST /posts/
-    bloguser.run = 13
-    runuser.save()  # PUT /runuser/345/
+    post = myclient.posts.create({'blog': 12, 'status': 1})  # POST /posts/
+    post.status = 2
+    post.save()  # PUT /posts/345/
 
 License
 -------
