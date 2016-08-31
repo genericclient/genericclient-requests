@@ -71,7 +71,7 @@ If the returned list is empty, will raise ``ResourceNotFound``.
 
 If the returned list contains more than 1 resource, will raise ``MultipleResourcesFound``
 
-Note that ``.get()`` will return a ``Resource``, not a list of ``Resource``s
+Note that ``.get()`` will return a ``Resource``, not a list of ``Resource`` s
 
 ::
 
