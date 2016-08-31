@@ -119,6 +119,16 @@ class Endpoint(object):
         result = response.json()
         return Resource(self, **result)
 
+    def get_or_create(self, **kwargs):
+        defaults = kwargs.pop('defaults', {})
+        try:
+            resource = self.get(**kwargs)
+            return resource
+        except ResourceNotFound:
+            params = {k: v for k, v in kwargs.items()}
+            params.update(defaults)
+            return self.create(params)
+
     def create_or_update(self, payload):
         if 'id' in payload:
             return Resource(self, **payload).save()

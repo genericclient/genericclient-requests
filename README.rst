@@ -87,12 +87,23 @@ returning a new ``Resource``::
 
     post = myclient.posts.create({'blog': 12, 'status': 1})  # POST /posts/
 
+``.get_or_create(defaults, **kwargs)``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Issues a GET to fetch the resource. If the resource is not found, issues a POST
+to create the resource.
+
+    # Assuming it doesn't exist
+    post = myclient.posts.get_or_update(slug='my-post', defaults={'status': 1})  # GET /posts/my-post/, then POST /posts/
+
+
 ``.create_or_update(payload)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If ``payload`` contains a key called ``'id'``, will issue a ``PUT``, otherwise
 it will call ``.create``::
 
+    post = myclient.posts.create_or_update({'status': 1})  # POST /posts/
     post = myclient.posts.create_or_update({'id': 1234, 'status': 1})  # PUT /posts/1234/
 
 
