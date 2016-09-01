@@ -1,3 +1,4 @@
+from json.decoder import JSONDecodeError
 import requests
 
 from . import exceptions
@@ -11,6 +12,18 @@ MultipleResourcesFound = exceptions.MultipleResourcesFound
 ResourceNotFound = exceptions.ResourceNotFound
 HTTPError = exceptions.HTTPError
 NotAuthenticatedError = exceptions.NotAuthenticatedError
+
+
+def hydrate_json(response):
+    try:
+        return response.json()
+    except JSONDecodeError:
+        raise ValueError(
+            "Response from server is not valid JSON. Received {}: {}".format(
+                response.status_code,
+                response.text,
+            ),
+        )
 
 
 class Resource(object):
@@ -43,10 +56,10 @@ class Resource(object):
         if 'id' in self.payload:
             url += self.payload['id'] + self._endpoint.trail
             response = self._endpoint.request('put', url, json=self.payload)
-            results = response.json()
+            results = hydrate_json(response)
         else:
             response = self._endpoint.request('post', url, json=self.payload)
-            results = response.json()
+            results = hydrate_json(response)
         self.payload = results
 
     def delete(self):
@@ -73,7 +86,7 @@ class Endpoint(object):
 
     def filter(self, **kwargs):
         response = self.request('get', self.url, params=kwargs)
-        results = response.json()
+        results = hydrate_json(response)
         return [Resource(self, **result) for result in results]
 
     def all(self):
@@ -99,7 +112,7 @@ class Endpoint(object):
         if response.status_code == 404:
             raise exceptions.ResourceNotFound("No `{}` found for {}".format(self.name, kwargs))
 
-        result = response.json()
+        result = hydrate_json(response)
 
         if isinstance(result, list):
             if len(result) == 0:
@@ -116,7 +129,7 @@ class Endpoint(object):
         if response.status_code != 201:
             raise exceptions.HTTPError(response)
 
-        result = response.json()
+        result = hydrate_json(response)
         return Resource(self, **result)
 
     def get_or_create(self, **kwargs):
