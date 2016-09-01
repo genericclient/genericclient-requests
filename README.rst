@@ -118,7 +118,7 @@ Resources
 ---------
 
 All endpoints methods (with the exception of ``.delete()``) return either a
-``Resource`` or a list of ``Resource``s.
+``Resource`` or a list of ``Resource`` s.
 
 A ``Resource`` is just a wrapping class for a ``dict``, where keys can be accessed
 as properties.
@@ -126,7 +126,7 @@ as properties.
 Additionally, ``Resource`` s have a special property called ``.payload``, which
 contains the original payload received from the server.
 
-``Resource``s have the following methods:
+``Resource`` s have the following methods:
 
 ``Resource.delete()`` will result in a ``DELETE``, with ``Resource.id`` as
 par of the URL::
