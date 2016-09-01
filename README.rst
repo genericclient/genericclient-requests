@@ -142,6 +142,6 @@ par of the URL::
     post.save()  # PUT /posts/345/
 
 License
--------
+=======
 
 Licensed under the MIT License.
