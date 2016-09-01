@@ -54,7 +54,7 @@ class Resource(object):
     def save(self):
         url = self._endpoint.url
         if 'id' in self.payload:
-            url += self.payload['id'] + self._endpoint.trail
+            url = "{}{}{}".format(url, self.payload['id'], self._endpoint.trail)
             response = self._endpoint.request('put', url, json=self.payload)
             results = hydrate_json(response)
         else:
@@ -63,7 +63,7 @@ class Resource(object):
         self.payload = results
 
     def delete(self):
-        url = self._endpoint.url + self.payload['id'] + self.endpoint.trail
+        url = "{}{}{}".format(self._endpoint.url, self.payload['id'], self.endpoint.trail)
         self._endpoint.request('delete', url)
 
     def __repr__(self):
@@ -80,7 +80,7 @@ class Endpoint(object):
         self.name = name
         self.trail = '/' if self.api.trailing_slash else ''
         self.endpoint = '%s%s' % (name, self.trail)
-        self.url = self.api.url + self.endpoint
+        self.url = "{}{}".format(self.api.url, self.endpoint)
 
         super(Endpoint, self).__init__()
 
@@ -183,7 +183,7 @@ class GenericClient(object):
         if auth is not None:
             self.session.auth = auth
         if not url.endswith('/'):
-            url += '/'
+            url = '{}/'.format(url)
         self.url = url
         self.trailing_slash = trailing_slash
 
