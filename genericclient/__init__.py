@@ -4,7 +4,7 @@ import requests
 from . import exceptions
 
 
-_version = "0.0.7"
+_version = "0.0.8"
 __version__ = VERSION = tuple(map(int, _version.split('.')))
 
 
