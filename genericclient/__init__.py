@@ -41,7 +41,7 @@ class Resource(object):
     def save(self):
         url = self._endpoint.url
         if 'id' in self.payload:
-            url += self.payload['id'] + self.endpoint.trail
+            url += self.payload['id'] + self._endpoint.trail
             response = self._endpoint.request('put', url, json=self.payload)
             results = response.json()
         else:
