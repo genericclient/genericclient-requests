@@ -100,12 +100,16 @@ to create the resource.
 ``.create_or_update(payload)``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If ``payload`` contains a key called ``'id'``, will issue a ``PUT``, otherwise
-it will call ``.create``::
+If ``payload`` contains a key called ``'id'``, will issue a ``PUT``. If the
+server returns a `400` error, a ``PATCH`` request will be re-issued.
+If `payload`` does not contains ``'id'``, it will issue a ``POST``::
 
     post = myclient.posts.create_or_update({'status': 1})  # POST /posts/
     post = myclient.posts.create_or_update({'id': 1234, 'status': 1})  # PUT /posts/1234/
 
+    post = myclient.posts.create_or_update({'id': 1234})  # PUT /posts/1234/
+    # <- server returns 400
+    # -> PATCH /posts/1234/
 
 ``.delete(pk)``
 ~~~~~~~~~~~~~~~
@@ -135,11 +139,17 @@ par of the URL::
     blog.delete()  # DELETE /blog/345/ -- the ID 345 was returned by the server in the previous response
 
 ``Resource.save()`` will result in a ``PUT``, with ``Resource.id`` as
-par of the URL::
+par of the URL. If the
+server returns a `400` error, a ``PATCH`` request will be re-issued::
 
     post = myclient.posts.create({'blog': 12, 'status': 1})  # POST /posts/
     post.status = 2
     post.save()  # PUT /posts/345/
+
+    post = Resource(id=345, status=1)
+    post.save()  # PUT /posts/345/
+    # <- server returns 400
+    # -> PATCH /posts/345/
 
 License
 =======

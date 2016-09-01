@@ -12,6 +12,7 @@ MultipleResourcesFound = exceptions.MultipleResourcesFound
 ResourceNotFound = exceptions.ResourceNotFound
 HTTPError = exceptions.HTTPError
 NotAuthenticatedError = exceptions.NotAuthenticatedError
+BadRequestError = exceptions.BadRequestError
 
 
 def hydrate_json(response):
@@ -44,6 +45,8 @@ class Resource(object):
     def __setattr__(self, name, value):
         if name == 'whitelist' or name in self.whitelist:
             return super(Resource, self).__setattr__(name, value)
+        if isinstance(value, self.__class__) and hasattr(value, 'id'):
+            value = value.id
         self.payload[name] = value
 
     def __getattribute__(self, name):
@@ -55,7 +58,10 @@ class Resource(object):
         url = self._endpoint.url
         if 'id' in self.payload:
             url = "{}{}{}".format(url, self.payload['id'], self._endpoint.trail)
-            response = self._endpoint.request('put', url, json=self.payload)
+            try:
+                response = self._endpoint.request('put', url, json=self.payload)
+            except exceptions.BadRequestError:
+                response = self._endpoint.request('patch', url, json=self.payload)
             results = hydrate_json(response)
         else:
             response = self._endpoint.request('post', url, json=self.payload)
@@ -163,6 +169,10 @@ class Endpoint(object):
 
         if response.status_code == 403:
             raise exceptions.NotAuthenticatedError(response, "Cannot authenticate user `{}` on the API".format(self.api.session.auth[0]))
+        elif response.status_code == 400:
+            raise exceptions.BadRequestError(
+                "Bad Request 400: {}".format(response.text)
+            )
         return response
 
     def __repr__(self):
@@ -176,6 +186,7 @@ class GenericClient(object):
     ResourceNotFound = ResourceNotFound
     HTTPError = HTTPError
     NotAuthenticatedError = NotAuthenticatedError
+    BadRequestError = BadRequestError
 
     def __init__(self, url, auth=None, adapter=None, trailing_slash=False):
         self.session = requests.session()
