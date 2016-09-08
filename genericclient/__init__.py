@@ -170,6 +170,7 @@ class Endpoint(object):
             raise exceptions.NotAuthenticatedError(response, "Cannot authenticate user `{}` on the API".format(self.api.session.auth[0]))
         elif response.status_code == 400:
             raise exceptions.BadRequestError(
+                response,
                 "Bad Request 400: {}".format(response.text)
             )
         return response
