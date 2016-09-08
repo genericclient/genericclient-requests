@@ -1,4 +1,3 @@
-from json.decoder import JSONDecodeError
 import requests
 
 from . import exceptions
@@ -18,7 +17,7 @@ BadRequestError = exceptions.BadRequestError
 def hydrate_json(response):
     try:
         return response.json()
-    except JSONDecodeError:
+    except ValueError:
         raise ValueError(
             "Response from server is not valid JSON. Received {}: {}".format(
                 response.status_code,
