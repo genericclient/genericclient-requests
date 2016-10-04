@@ -66,6 +66,7 @@ class Resource(object):
             response = self._endpoint.request('post', url, json=self.payload)
             results = hydrate_json(response)
         self.payload = results
+        return self
 
     def delete(self):
         url = "{}{}{}".format(self._endpoint.url, self.payload['id'], self.endpoint.trail)
