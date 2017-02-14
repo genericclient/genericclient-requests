@@ -28,6 +28,10 @@ setup(
         'License :: OSI Approved :: MIT License',
     ],
     install_requires=[
-        "requests==2.9.1",
+        "requests>=2.13.0",
     ],
+    test_suite='tests',
+    tests_require=[
+        "responses==0.5.1",
+    ]
 )

@@ -1,3 +1,8 @@
+try:
+    from urllib.parse import urljoin
+except ImportError:
+    from urlparse import urljoin
+
 import requests
 
 from . import exceptions
@@ -26,6 +31,14 @@ def hydrate_json(response):
         )
 
 
+def _urljoin(base, parts, trail=False):
+    _trail = '/' if trail else ''
+    url = base
+    if not url.endswith('/'):
+        url += '/'
+    return urljoin(url, *map(str, parts)) + _trail
+
+
 class Resource(object):
     whitelist = (
         '__class__',
@@ -33,6 +46,7 @@ class Resource(object):
         'payload',
         'save',
         'delete',
+        '_urljoin',
     )
 
     def __init__(self, endpoint, **kwargs):
@@ -40,6 +54,9 @@ class Resource(object):
         self.payload = kwargs
 
         super(Resource, self).__init__()
+
+    def _urljoin(self, *parts):
+        return _urljoin(self._endpoint.url, parts, self._endpoint.trail)
 
     def __setattr__(self, name, value):
         if name == 'whitelist' or name in self.whitelist:
@@ -49,14 +66,14 @@ class Resource(object):
         self.payload[name] = value
 
     def __getattribute__(self, name):
-        if name == 'whitelist' or name in self.whitelist:
+        try:
             return super(Resource, self).__getattribute__(name)
-        return self.payload[name]
+        except AttributeError:
+            return self.payload[name]
 
     def save(self):
-        url = self._endpoint.url
         if 'id' in self.payload:
-            url = "{}{}{}".format(url, self.payload['id'], self._endpoint.trail)
+            url = self._urljoin(self.payload['id'])
             try:
                 response = self._endpoint.request('put', url, json=self.payload)
             except exceptions.BadRequestError:
@@ -69,7 +86,7 @@ class Resource(object):
         return self
 
     def delete(self):
-        url = "{}{}{}".format(self._endpoint.url, self.payload['id'], self.endpoint.trail)
+        url = self._urljoin(self.payload['id'])
         self._endpoint.request('delete', url)
 
     def __repr__(self):
@@ -81,14 +98,17 @@ class Resource(object):
 
 
 class Endpoint(object):
+
     def __init__(self, api, name):
         self.api = api
         self.name = name
         self.trail = '/' if self.api.trailing_slash else ''
-        self.endpoint = '%s%s' % (name, self.trail)
-        self.url = "{}{}".format(self.api.url, self.endpoint)
+        self.url = "{}{}{}".format(self.api.url, name, self.trail)
 
         super(Endpoint, self).__init__()
+
+    def _urljoin(self, *parts):
+        return _urljoin(self.url, parts, self.trail)
 
     def filter(self, **kwargs):
         response = self.request('get', self.url, params=kwargs)
@@ -100,16 +120,16 @@ class Endpoint(object):
 
     def get(self, **kwargs):
         if 'id' in kwargs:
-            url = "{0}{1}{2}".format(self.url, kwargs['id'], self.trail)
+            url = self._urljoin(kwargs['id'])
             response = self.request('get', url)
         elif 'pk' in kwargs:
-            url = "{0}{1}{2}".format(self.url, kwargs['pk'], self.trail)
+            url = self._urljoin(kwargs['pk'])
             response = self.request('get', url)
         elif 'slug' in kwargs:
-            url = "{0}{1}{2}".format(self.url, kwargs['slug'], self.trail)
+            url = self._urljoin(kwargs['slug'])
             response = self.request('get', url)
         elif 'username' in kwargs:
-            url = "{0}{1}{2}".format(self.url, kwargs['username'], self.trail)
+            url = self._urljoin(kwargs['username'])
             response = self.request('get', url)
         else:
             url = self.url
@@ -155,7 +175,7 @@ class Endpoint(object):
         return self.create(payload)
 
     def delete(self, pk):
-        url = "{}{}{}".format(self.url, pk, self.trail)
+        url = self._urljoin(pk)
 
         response = self.request('delete', url)
 
@@ -205,6 +225,7 @@ class GenericClient(object):
         super(GenericClient, self).__init__()
 
     def __getattribute__(self, name):
-        if name in ('session', 'url', 'endpoint_class', 'trailing_slash'):
+        try:
             return super(GenericClient, self).__getattribute__(name)
-        return self.endpoint_class(self, name)
+        except AttributeError:
+            return self.endpoint_class(self, name)

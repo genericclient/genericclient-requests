@@ -1,0 +1,5 @@
+[run]
+include = genericclient/*
+
+[report]
+show_missing = True
