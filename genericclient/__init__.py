@@ -81,6 +81,7 @@ class Resource(object):
 
 
 class Endpoint(object):
+
     def __init__(self, api, name):
         self.api = api
         self.name = name
