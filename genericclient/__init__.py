@@ -205,6 +205,7 @@ class GenericClient(object):
         super(GenericClient, self).__init__()
 
     def __getattribute__(self, name):
-        if name in ('session', 'url', 'endpoint_class', 'trailing_slash'):
+        try:
             return super(GenericClient, self).__getattribute__(name)
-        return self.endpoint_class(self, name)
+        except AttributeError:
+            return self.endpoint_class(self, name)
