@@ -66,9 +66,10 @@ class Resource(object):
         self.payload[name] = value
 
     def __getattribute__(self, name):
-        if name == 'whitelist' or name in self.whitelist:
+        try:
             return super(Resource, self).__getattribute__(name)
-        return self.payload[name]
+        except AttributeError:
+            return self.payload[name]
 
     def save(self):
         if 'id' in self.payload:
