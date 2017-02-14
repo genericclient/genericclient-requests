@@ -30,4 +30,9 @@ setup(
     install_requires=[
         "requests==2.9.1",
     ],
+    test_suite='nose.collector',
+    tests_require=[
+        "responses==0.5.1",
+        "nose==1.3.7",
+    ]
 )
