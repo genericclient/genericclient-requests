@@ -65,16 +65,13 @@ class Resource(object):
             value = value.id
         self.payload[name] = value
 
-    def __getattribute__(self, name):
-        try:
-            return super(Resource, self).__getattribute__(name)
-        except AttributeError:
-            if name not in self.payload:
-                raise AttributeError("Resource on endpoint `{}` has not attribute '{}'".format(
-                    self._endpoint.name,
-                    name,
-                ))
-            return self.payload[name]
+    def __getattr__(self, name):
+        if name not in self.payload:
+            raise AttributeError("Resource on endpoint `{}` has not attribute '{}'".format(
+                self._endpoint.name,
+                name,
+            ))
+        return self.payload[name]
 
     def save(self):
         if 'id' in self.payload:
@@ -229,8 +226,5 @@ class GenericClient(object):
 
         super(GenericClient, self).__init__()
 
-    def __getattribute__(self, name):
-        try:
-            return super(GenericClient, self).__getattribute__(name)
-        except AttributeError:
-            return self.endpoint_class(self, name)
+    def __getattr__(self, name):
+        return self.endpoint_class(self, name)
