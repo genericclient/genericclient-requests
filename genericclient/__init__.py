@@ -70,7 +70,10 @@ class Resource(object):
             return super(Resource, self).__getattribute__(name)
         except AttributeError:
             if name not in self.payload:
-                raise
+                raise AttributeError("Resource on endpoint `{}` has not attribute '{}'".format(
+                    self._endpoint.name,
+                    name,
+                ))
             return self.payload[name]
 
     def save(self):
