@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import responses
 
-from genericclient import GenericClient
+from genericclient import GenericClient, Resource, AmbiguousComparison
 
 
 MOCK_API_URL = 'http://dummy.org'
@@ -86,3 +86,15 @@ class ResourceTestCase(TestCase):
 
             user1.group = 'admins'
             user1.save()
+
+    def test_equality(self):
+        endpoint = generic_client.users
+        res1 = Resource(endpoint, id=1)
+        res2 = Resource(endpoint, id=1)
+        res3 = Resource(endpoint, id=3)
+        res4 = Resource(endpoint, id=1, username='username')
+
+        self.assertEqual(res1, res2)
+        self.assertNotEqual(res3, res2)
+        with self.assertRaises(AmbiguousComparison):
+            res4 == res1

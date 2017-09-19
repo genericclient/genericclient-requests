@@ -12,6 +12,7 @@ _version = "0.0.15"
 __version__ = VERSION = tuple(map(int, _version.split('.')))
 
 
+AmbiguousComparison = exceptions.AmbiguousComparison
 MultipleResourcesFound = exceptions.MultipleResourcesFound
 ResourceNotFound = exceptions.ResourceNotFound
 HTTPError = exceptions.HTTPError
@@ -55,6 +56,33 @@ class Resource(object):
 
         super(Resource, self).__init__()
 
+    def __setattr__(self, name, value):
+        if name == 'whitelist' or name in self.whitelist:
+            return super(Resource, self).__setattr__(name, value)
+        if isinstance(value, self.__class__) and hasattr(value, 'pk'):
+            value = value.pk
+        self.payload[name] = value
+
+    def __getattr__(self, name):
+        if name not in self.payload:
+            raise AttributeError("Resource on endpoint `{}` has not attribute '{}'".format(
+                self._endpoint.name,
+                name,
+            ))
+        return self.payload[name]
+
+    def __repr__(self):
+        return '<Resource `{0}` {}: {1}>'.format(self._endpoint.name, self.pk_name, self.pk)
+
+    def __eq__(self, other):
+        if self.payload != other.payload and self.pk == other.pk:
+            raise AmbiguousComparison(
+                "Payloads are different, but {}:{} is the same.".format(
+                    self.pk_name, self.pk
+                )
+            )
+        return self.payload == other.payload
+
     @property
     def pk_name(self):
         pk_name = None
@@ -73,21 +101,6 @@ class Resource(object):
     def _urljoin(self, *parts):
         return _urljoin(self._endpoint.url, parts, self._endpoint.trail)
 
-    def __setattr__(self, name, value):
-        if name == 'whitelist' or name in self.whitelist:
-            return super(Resource, self).__setattr__(name, value)
-        if isinstance(value, self.__class__) and hasattr(value, 'pk'):
-            value = value.pk
-        self.payload[name] = value
-
-    def __getattr__(self, name):
-        if name not in self.payload:
-            raise AttributeError("Resource on endpoint `{}` has not attribute '{}'".format(
-                self._endpoint.name,
-                name,
-            ))
-        return self.payload[name]
-
     def save(self):
         if self.pk is not None:
             url = self._urljoin(self.pk)
@@ -105,9 +118,6 @@ class Resource(object):
     def delete(self):
         url = self._urljoin(self.pk)
         self._endpoint.request('delete', url)
-
-    def __repr__(self):
-        return '<Resource `{0}` {}: {1}>'.format(self._endpoint.name, self.pk_name, self.pk)
 
 
 class Endpoint(object):
