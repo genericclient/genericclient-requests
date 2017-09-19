@@ -70,6 +70,22 @@ class EndpointTestCase(TestCase):
 
             self.assertRaises(generic_client.ResourceNotFound, generic_client.users.get, id=9999)
 
+    def test_endpoint_get_uuid(self):
+        with responses.RequestsMock() as rsps:
+            rsps.add(responses.GET, MOCK_API_URL + '/users/2', json={
+                'uuid': 2,
+                'username': 'user2',
+                'group': 'watchers',
+            })
+
+            user2 = generic_client.users.get(uuid=2)
+            self.assertEqual(user2.username, 'user2')
+
+        with responses.RequestsMock() as rsps:
+            rsps.add(responses.GET, MOCK_API_URL + '/users/9999', status=404)
+
+            self.assertRaises(generic_client.ResourceNotFound, generic_client.users.get, uuid=9999)
+
     def test_endpoint_get_params(self):
         with responses.RequestsMock() as rsps:
             rsps.add(responses.GET, MOCK_API_URL + '/users', json=[

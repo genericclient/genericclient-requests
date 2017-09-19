@@ -55,14 +55,29 @@ class Resource(object):
 
         super(Resource, self).__init__()
 
+    @property
+    def pk_name(self):
+        pk_name = None
+        if 'id' in self.payload:
+            pk_name = 'id'
+        elif 'uuid' in self.payload:
+            pk_name = 'uuid'
+        return pk_name
+
+    @property
+    def pk(self):
+        if self.pk_name is not None:
+            return self.payload.get(self.pk_name)
+        return None
+
     def _urljoin(self, *parts):
         return _urljoin(self._endpoint.url, parts, self._endpoint.trail)
 
     def __setattr__(self, name, value):
         if name == 'whitelist' or name in self.whitelist:
             return super(Resource, self).__setattr__(name, value)
-        if isinstance(value, self.__class__) and hasattr(value, 'id'):
-            value = value.id
+        if isinstance(value, self.__class__) and hasattr(value, 'pk'):
+            value = value.pk
         self.payload[name] = value
 
     def __getattr__(self, name):
@@ -74,8 +89,8 @@ class Resource(object):
         return self.payload[name]
 
     def save(self):
-        if 'id' in self.payload:
-            url = self._urljoin(self.payload['id'])
+        if self.pk is not None:
+            url = self._urljoin(self.pk)
             try:
                 response = self._endpoint.request('put', url, json=self.payload)
             except exceptions.BadRequestError:
@@ -88,15 +103,11 @@ class Resource(object):
         return self
 
     def delete(self):
-        url = self._urljoin(self.payload['id'])
+        url = self._urljoin(self.pk)
         self._endpoint.request('delete', url)
 
     def __repr__(self):
-        try:
-            pk = self.id
-        except AttributeError:
-            pk = None
-        return '<Resource `{0}` id: {1}>'.format(self._endpoint.name, pk)
+        return '<Resource `{0}` {}: {1}>'.format(self._endpoint.name, self.pk_name, self.pk)
 
 
 class Endpoint(object):
@@ -123,6 +134,9 @@ class Endpoint(object):
     def get(self, **kwargs):
         if 'id' in kwargs:
             url = self._urljoin(kwargs['id'])
+            response = self.request('get', url)
+        elif 'uuid' in kwargs:
+            url = self._urljoin(kwargs['uuid'])
             response = self.request('get', url)
         elif 'pk' in kwargs:
             url = self._urljoin(kwargs['pk'])
@@ -171,7 +185,7 @@ class Endpoint(object):
             return self.create(params)
 
     def create_or_update(self, payload):
-        if 'id' in payload:
+        if 'id' in payload or 'uuid' in payload:
             return Resource(self, **payload).save()
 
         return self.create(payload)
