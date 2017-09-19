@@ -22,3 +22,7 @@ class NotAuthenticatedError(ValueError):
     def __init__(self, response, message=None, *args, **kwargs):
         self.response = response
         super(NotAuthenticatedError, self).__init__(message, *args, **kwargs)
+
+
+class AmbiguousComparison(ValueError):
+    pass
