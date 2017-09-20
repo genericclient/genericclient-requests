@@ -98,3 +98,10 @@ class ResourceTestCase(TestCase):
         self.assertNotEqual(res3, res2)
         with self.assertRaises(AmbiguousComparison):
             res4 == res1
+
+    def test_repr(self):
+        endpoint = generic_client.users
+        res1 = Resource(endpoint, id=1)
+
+        representation = repr(res1)
+        self.assertEqual(representation, '<Resource `users` id: 1>')
