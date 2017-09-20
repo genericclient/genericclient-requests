@@ -72,7 +72,7 @@ class Resource(object):
         return self.payload[name]
 
     def __repr__(self):
-        return '<Resource `{0}` {}: {1}>'.format(self._endpoint.name, self.pk_name, self.pk)
+        return '<Resource `{0}` {1}: {2}>'.format(self._endpoint.name, self.pk_name, self.pk)
 
     def __eq__(self, other):
         if self.payload != other.payload and self.pk == other.pk:
