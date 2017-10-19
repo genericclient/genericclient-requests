@@ -31,13 +31,14 @@ Instantiation
 
 ::
 
-    myclient = GenericClient(url, auth=None, adapter=None, trailing_slash=False)
+    myclient = GenericClient(url, auth=None, session=None, adapter=None, trailing_slash=False)
 
 
 Arguments:
 
 * ``url``: The root URL of your API
 * ``auth``: The auth for your API. You can pass anything that ``requests`` can accept as auth.
+* ``session``: Pass a session instance to have ``requests`` use that session. If ``None`` (the default), it will instantiate an instance of ``requests.session`` for you.
 * ``adapter``: optional session adapter for ``requests``.
 * ``trailing_slash``: You can set this to ``True`` if your API's URLs end with a ``/``
 

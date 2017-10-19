@@ -235,8 +235,11 @@ class GenericClient(object):
     NotAuthenticatedError = NotAuthenticatedError
     BadRequestError = BadRequestError
 
-    def __init__(self, url, auth=None, adapter=None, trailing_slash=False):
-        self.session = requests.session()
+    def __init__(self, url, auth=None, session=None, adapter=None, trailing_slash=False):
+        if session is None:
+            self.session = requests.session()
+        else:
+            self.session = session
         self.session.headers.update({'Content-Type': 'application/json'})
         if auth is not None:
             self.session.auth = auth

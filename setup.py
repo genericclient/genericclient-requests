@@ -33,5 +33,6 @@ setup(
     test_suite='tests',
     tests_require=[
         "responses==0.5.1",
+        "requests-threads>=0.1.1",
     ]
 )
