@@ -2,8 +2,8 @@
 genericclient
 =============
 
-[![Build Status](https://travis-ci.org/fcurella/genericclient.svg?branch=master)](https://travis-ci.org/fcurella/genericclient)
-
+.. image:: https://travis-ci.org/fcurella/genericclient.svg?branch=master
+    :target: https://travis-ci.org/fcurella/genericclient
 
 A generic client for RESTful APIs
 
