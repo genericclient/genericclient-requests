@@ -1,12 +1,12 @@
 try:
-    from urllib.parse import urljoin, urlparse
+    from urllib.parse import urlparse
 except ImportError:
-    from urlparse import urljoin, urlparse
+    from urlparse import urlparse
 
 import requests
 
-from . import exceptions
-
+from . import exceptions, utils
+from .routes import DetailRoute, ListRoute
 
 _version = "0.0.17"
 __version__ = VERSION = tuple(map(int, _version.split('.')))
@@ -18,6 +18,7 @@ ResourceNotFound = exceptions.ResourceNotFound
 HTTPError = exceptions.HTTPError
 NotAuthenticatedError = exceptions.NotAuthenticatedError
 BadRequestError = exceptions.BadRequestError
+UnknownPK = exceptions.UnknownPK
 
 
 def hydrate_json(response):
@@ -30,14 +31,6 @@ def hydrate_json(response):
                 response.text,
             ),
         )
-
-
-def _urljoin(base, parts, trail=False):
-    _trail = '/' if trail else ''
-    url = base
-    if not url.endswith('/'):
-        url += '/'
-    return urljoin(url, *map(str, parts)) + _trail
 
 
 class Resource(object):
@@ -72,7 +65,9 @@ class Resource(object):
         return self.payload[name]
 
     def __repr__(self):
-        return '<Resource `{0}` {1}: {2}>'.format(self._endpoint.name, self.pk_name, self.pk)
+        return '<{0} `{1}` {2}: {3}>'.format(
+            self.__class__.__name__, self._endpoint.name, self.pk_name, self.pk,
+        )
 
     def __eq__(self, other):
         if self.payload != other.payload and self.pk == other.pk:
@@ -99,7 +94,7 @@ class Resource(object):
         return None
 
     def _urljoin(self, *parts):
-        return _urljoin(self._endpoint.url, parts, self._endpoint.trail)
+        return utils.urljoin(self._endpoint.url, parts, self._endpoint.trail)
 
     def save(self):
         if self.pk is not None:
@@ -121,17 +116,19 @@ class Resource(object):
 
 
 class Endpoint(object):
+    detail_route_class = DetailRoute
+    list_route_class = ListRoute
 
     def __init__(self, api, name):
         self.api = api
         self.name = name
-        self.trail = '/' if self.api.trailing_slash else ''
-        self.url = "{}{}{}".format(self.api.url, name, self.trail)
+        self.trail = self.api.trailing_slash
+        self.url = utils.urljoin(self.api.url, [name], self.trail)
 
         super(Endpoint, self).__init__()
 
     def _urljoin(self, *parts):
-        return _urljoin(self.url, parts, self.trail)
+        return utils.urljoin(self.url, parts, self.trail)
 
     def filter(self, **kwargs):
         response = self.request('get', self.url, params=kwargs)
@@ -141,23 +138,18 @@ class Endpoint(object):
     def all(self):
         return self.filter()
 
-    def get(self, **kwargs):
-        if 'id' in kwargs:
-            url = self._urljoin(kwargs['id'])
-            response = self.request('get', url)
-        elif 'uuid' in kwargs:
-            url = self._urljoin(kwargs['uuid'])
-            response = self.request('get', url)
-        elif 'pk' in kwargs:
-            url = self._urljoin(kwargs['pk'])
-            response = self.request('get', url)
-        elif 'slug' in kwargs:
-            url = self._urljoin(kwargs['slug'])
-            response = self.request('get', url)
-        elif 'username' in kwargs:
-            url = self._urljoin(kwargs['username'])
-            response = self.request('get', url)
+    def __call__(self, _method='post', **kwargs):
+        if kwargs:
+            return self.detail_route_class(self, _method, **kwargs)
         else:
+            return self.list_route_class(self, _method)
+
+    def get(self, **kwargs):
+        try:
+            pk = utils.find_pk(kwargs)
+            url = self._urljoin(pk)
+            response = self.request('get', url)
+        except exceptions.UnknownPK:
             url = self.url
             response = self.request('get', url, params=kwargs)
 
@@ -205,16 +197,30 @@ class Endpoint(object):
 
         response = self.request('delete', url)
 
+        if response.status_code == 404:
+            raise exceptions.ResourceNotFound("No `{}` found for pk {}".format(self.name, pk))
+
         if response.status_code != 204:
             raise exceptions.HTTPError(response)
 
         return None
 
-    def request(self, method, *args, **kwargs):
-        response = getattr(self.api.session, method)(*args, **kwargs)
+    def request(self, method, url, *args, **kwargs):
+        response = getattr(self.api.session, method)(url, *args, **kwargs)
 
         if response.status_code == 403:
-            raise exceptions.NotAuthenticatedError(response, "Cannot authenticate user `{}` on the API".format(self.api.session.auth[0]))
+            if self.api.session.auth:
+                msg = "Failed request to `{}`. Cannot authenticate user `{}` on the API.".format(
+                    url, self.api.session.auth[0],
+                ),
+            else:
+                msg = "Failed request to `{}`. User is not authenticated.".format(
+                    url,
+                ),
+
+            raise exceptions.NotAuthenticatedError(
+                response, msg,
+            )
         elif response.status_code == 400:
             raise exceptions.BadRequestError(
                 response,
@@ -223,7 +229,7 @@ class Endpoint(object):
         return response
 
     def __repr__(self):
-        return "<Endpoint `{}`>".format(self.url)
+        return "<{} `{}`>".format(self.__class__.__name__, self.url)
 
 
 class GenericClient(object):
@@ -234,6 +240,7 @@ class GenericClient(object):
     HTTPError = HTTPError
     NotAuthenticatedError = NotAuthenticatedError
     BadRequestError = BadRequestError
+    UnknownPK = UnknownPK
 
     def __init__(self, url, auth=None, session=None, adapter=None, trailing_slash=False):
         if session is None:

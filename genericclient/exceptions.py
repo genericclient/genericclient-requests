@@ -26,3 +26,7 @@ class NotAuthenticatedError(ValueError):
 
 class AmbiguousComparison(ValueError):
     pass
+
+
+class UnknownPK(ValueError):
+    pass
