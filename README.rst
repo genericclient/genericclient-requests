@@ -169,10 +169,7 @@ If your API has some non-RESTful calls within the main endpoints (sometimes refe
 
 Routes http calls use ``POST`` by default, but you can specify something else by using the ``_method`` argument::
 
-::
-
     myclient.posts(_method='get', id=123).pingbacks(), 
-
 
 ::
 
