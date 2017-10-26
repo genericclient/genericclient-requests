@@ -18,6 +18,7 @@ ResourceNotFound = exceptions.ResourceNotFound
 HTTPError = exceptions.HTTPError
 NotAuthenticatedError = exceptions.NotAuthenticatedError
 BadRequestError = exceptions.BadRequestError
+UnknownPK = exceptions.UnknownPK
 
 
 def hydrate_json(response):
@@ -196,16 +197,30 @@ class Endpoint(object):
 
         response = self.request('delete', url)
 
+        if response.status_code == 404:
+            raise exceptions.ResourceNotFound("No `{}` found for pk {}".format(self.name, pk))
+
         if response.status_code != 204:
             raise exceptions.HTTPError(response)
 
         return None
 
-    def request(self, method, *args, **kwargs):
-        response = getattr(self.api.session, method)(*args, **kwargs)
+    def request(self, method, url, *args, **kwargs):
+        response = getattr(self.api.session, method)(url, *args, **kwargs)
 
         if response.status_code == 403:
-            raise exceptions.NotAuthenticatedError(response, "Cannot authenticate user `{}` on the API".format(self.api.session.auth[0]))
+            if self.api.session.auth:
+                msg = "Failed request to `{}`. Cannot authenticate user `{}` on the API.".format(
+                    url, self.api.session.auth[0],
+                ),
+            else:
+                msg = "Failed request to `{}`. User is not authenticated.".format(
+                    url,
+                ),
+
+            raise exceptions.NotAuthenticatedError(
+                response, msg,
+            )
         elif response.status_code == 400:
             raise exceptions.BadRequestError(
                 response,
@@ -225,6 +240,7 @@ class GenericClient(object):
     HTTPError = HTTPError
     NotAuthenticatedError = NotAuthenticatedError
     BadRequestError = BadRequestError
+    UnknownPK = UnknownPK
 
     def __init__(self, url, auth=None, session=None, adapter=None, trailing_slash=False):
         if session is None:

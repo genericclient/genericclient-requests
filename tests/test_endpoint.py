@@ -85,6 +85,13 @@ class EndpointTestCase(TestCase):
 
             self.assertRaises(generic_client.ResourceNotFound, generic_client.users.get, uuid=9999)
 
+    def test_unauthenticated(self):
+        with responses.RequestsMock() as rsps:
+            rsps.add(responses.GET, MOCK_API_URL + '/users', status=403)
+
+            with self.assertRaises(generic_client.NotAuthenticatedError):
+                generic_client.users.all()
+
     def test_endpoint_get_params(self):
         with responses.RequestsMock() as rsps:
             rsps.add(responses.GET, MOCK_API_URL + '/users', json=[
@@ -118,3 +125,58 @@ class EndpointTestCase(TestCase):
 
             admin = generic_client.users.get(role='admin')
             self.assertEqual(admin.username, 'user3')
+
+    def test_endpoint_create(self):
+        with responses.RequestsMock() as rsps:
+            rsps.add(responses.POST, MOCK_API_URL + '/users', json={
+                'id': 1,
+                'username': 'user1',
+                'group': 'watchers',
+            }, status=201)
+
+            user = generic_client.users.create({
+                'id': 1,
+                'username': 'user1',
+                'group': 'watchers',
+            })
+            self.assertEqual(user.id, 1)
+            self.assertEqual(user.username, 'user1')
+            self.assertEqual(user.group, 'watchers')
+
+        with responses.RequestsMock() as rsps:
+            rsps.add(responses.POST, MOCK_API_URL + '/users', status=400)
+
+            with self.assertRaises(generic_client.BadRequestError):
+                generic_client.users.create({
+                    'id': 1,
+                    'username': 'user1',
+                    'group': 'watchers',
+                })
+
+        with responses.RequestsMock() as rsps:
+            rsps.add(responses.POST, MOCK_API_URL + '/users', status=500)
+
+            with self.assertRaises(generic_client.HTTPError):
+                generic_client.users.create({
+                    'id': 1,
+                    'username': 'user1',
+                    'group': 'watchers',
+                })
+
+    def test_endpoint_delete(self):
+        with responses.RequestsMock() as rsps:
+            rsps.add(responses.DELETE, MOCK_API_URL + '/users/1', status=204)
+
+            generic_client.users.delete(1)
+
+        with responses.RequestsMock() as rsps:
+            rsps.add(responses.DELETE, MOCK_API_URL + '/users/1', status=404)
+
+            with self.assertRaises(generic_client.ResourceNotFound):
+                generic_client.users.delete(1)
+
+        with responses.RequestsMock() as rsps:
+            rsps.add(responses.DELETE, MOCK_API_URL + '/users/1', status=500)
+
+            with self.assertRaises(generic_client.HTTPError):
+                generic_client.users.delete(1)
