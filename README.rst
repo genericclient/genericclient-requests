@@ -152,6 +152,31 @@ server returns a `400` error, a ``PATCH`` request will be re-issued::
     # <- server returns 400
     # -> PATCH /posts/345/
 
+Routes
+------
+
+If your API has some non-RESTful calls within the main endpoints (sometimes referred as ``detail_route`` and ``list_route``), you can use ``genericclient`` to call them::
+
+    myclient.posts(id=123).publish(date=tomorrow), 
+
+::
+
+    myclient.blogs().ping() 
+
+
+Routes http calls use ``POST`` by default, but you can specify something else by using the ``_method`` argument::
+
+::
+
+    myclient.posts(_method='get', id=123).pingbacks(), 
+
+
+::
+
+    myclient.blogs(_method='get').visits()
+
+Note that this calls will return an instance of ``requests.Response`` instead of a ``genericclient.Resource``
+
 License
 =======
 
