@@ -10,7 +10,6 @@ MOCK_API_URL = 'http://dummy.org'
 generic_client = GenericClient(url=MOCK_API_URL)
 
 
-# Create your tests here.
 class EndpointTestCase(TestCase):
 
     def test_endpoint_all(self):
