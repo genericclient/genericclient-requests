@@ -1,7 +1,7 @@
 try:
-    from urllib.parse import urljoin
+    from urllib.parse import urljoin, urlparse
 except ImportError:
-    from urlparse import urljoin
+    from urlparse import urljoin, urlparse
 
 import requests
 
@@ -255,6 +255,13 @@ class GenericClient(object):
     def set_auth(self, auth):
         if auth is not None:
             self.session.auth = auth
+
+    @property
+    def host(self):
+        scheme, netloc, path, _, query, _ = urlparse(
+            self.url,
+        )
+        return netloc
 
     def __getattr__(self, name):
         return self.endpoint_class(self, name)
