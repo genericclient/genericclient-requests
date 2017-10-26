@@ -241,8 +241,7 @@ class GenericClient(object):
         else:
             self.session = session
         self.session.headers.update({'Content-Type': 'application/json'})
-        if auth is not None:
-            self.session.auth = auth
+        self.set_auth(auth)
         if not url.endswith('/'):
             url = '{}/'.format(url)
         self.url = url
@@ -252,6 +251,10 @@ class GenericClient(object):
             self.session.mount(url, adapter())
 
         super(GenericClient, self).__init__()
+
+    def set_auth(self, auth):
+        if auth is not None:
+            self.session.auth = auth
 
     def __getattr__(self, name):
         return self.endpoint_class(self, name)
