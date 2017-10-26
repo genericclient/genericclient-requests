@@ -6,7 +6,7 @@ except ImportError:
 import requests
 
 from . import exceptions, utils
-from .routes import DetailRoute
+from .routes import DetailRoute, ListRoute
 
 _version = "0.0.17"
 __version__ = VERSION = tuple(map(int, _version.split('.')))
@@ -116,6 +116,7 @@ class Resource(object):
 
 class Endpoint(object):
     detail_route_class = DetailRoute
+    list_route_class = ListRoute
 
     def __init__(self, api, name):
         self.api = api
@@ -136,8 +137,11 @@ class Endpoint(object):
     def all(self):
         return self.filter()
 
-    def detail(self, **kwargs):
-        return self.detail_route_class(self, **kwargs)
+    def __call__(self, _method='post', **kwargs):
+        if kwargs:
+            return self.detail_route_class(self, _method, **kwargs)
+        else:
+            return self.list_route_class(self, _method)
 
     def get(self, **kwargs):
         try:
