@@ -8,7 +8,7 @@ import requests
 from . import exceptions, utils
 from .routes import DetailRoute, ListRoute
 
-_version = "0.0.17"
+_version = "0.0.18"
 __version__ = VERSION = tuple(map(int, _version.split('.')))
 
 
