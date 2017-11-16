@@ -1,4 +1,4 @@
-from . import utils
+from genericclient_base import utils
 
 
 class Action(object):
@@ -27,7 +27,7 @@ class ListAction(Action):
     pass
 
 
-class DetailAction(ListAction):
+class DetailAction(Action):
 
     def __init__(self, endpoint, method, name, **lookup):
         super(DetailAction, self).__init__(endpoint, method, name)

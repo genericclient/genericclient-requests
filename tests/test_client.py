@@ -3,7 +3,7 @@ from unittest import TestCase
 from genericclient import GenericClient
 
 
-class EndpointTestCase(TestCase):
+class RequestClientTestCase(TestCase):
 
     def test_host(self):
         client = GenericClient(url='http://dummy.org')
@@ -17,3 +17,7 @@ class EndpointTestCase(TestCase):
 
         client = GenericClient(url='http://dummy.org/api')
         self.assertEqual(client.host, 'dummy.org')
+
+    def test_session(self):
+        client = GenericClient(url='http://dummy.org', auth=('username', 'password'))
+        self.assertEqual(client.session.auth[0], 'username')
