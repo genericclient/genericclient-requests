@@ -2,10 +2,14 @@
 genericclient
 =============
 
-.. image:: https://travis-ci.org/fcurella/genericclient.svg?branch=master
-    :target: https://travis-ci.org/fcurella/genericclient
+.. image:: https://travis-ci.org/genericclient/genericclient-requests.svg?branch=master
+    :target: https://travis-ci.org/genericclient/genericclient-requests
 
-A generic client for RESTful APIs
+A generic client for RESTful APIs based on ``requests``.
+
+
+Installation
+============
 
 ::
 
@@ -24,7 +28,6 @@ Quickstart
     myresource = myclient.resources.get(id=1)
 
     actives = myclient.posts.filter(active=True)
-
 
 Usage
 =====
@@ -56,6 +59,9 @@ Endpoints are available as properties on the main instance.
 Retrieves all resources (essentially a simple ``GET`` on the endpoint)::
 
     myclient.posts.all()  # GET /posts/
+
+``.filter()``
+~~~~~~~~~~~~~
 
 ``.filter(**kwargs)`` calls a ``GET`` with ``kwargs`` as querystring values::
 
@@ -95,7 +101,7 @@ returning a new ``Resource``::
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Issues a GET to fetch the resource. If the resource is not found, issues a POST
-to create the resource.
+to create the resource::
 
     # Assuming it doesn't exist
     post = myclient.posts.get_or_update(slug='my-post', defaults={'status': 1})  # GET /posts/my-post/, then POST /posts/
@@ -175,7 +181,7 @@ Routes http calls use ``POST`` by default, but you can specify something else by
 
     myclient.blogs(_method='get').visits()
 
-Note that this calls will return an instance of ``requests.Response`` instead of a ``genericclient.Resource``
+Note that instead of instances of ``genericclient.Resource``, this calls will return an instance of ``requests.Response``.
 
 License
 =======

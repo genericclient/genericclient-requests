@@ -15,7 +15,7 @@ setup(
     long_description=readme,
     author='Flavio Curella',
     author_email='flavio.curella@gmail.com',
-    url='',
+    url='https://github.com/genericclient/genericclient-requests',
     include_package_data=True,
     packages=find_packages(),
     zip_safe=False,
@@ -28,11 +28,11 @@ setup(
         'License :: OSI Approved :: MIT License',
     ],
     install_requires=[
+        "genericclient-base==0.0.3",
         "requests>=2.13.0",
     ],
     test_suite='tests',
     tests_require=[
         "responses==0.5.1",
-        "requests-threads>=0.1.1",
     ]
 )

@@ -1,3 +1,0 @@
-responses
-coverage
-requests-threads>=0.1.1
