@@ -3,6 +3,10 @@ import requests
 from genericclient_base import BaseEndpoint, BaseGenericClient, BaseResource, exceptions
 
 
+_version = "0.0.19"
+__version__ = VERSION = tuple(map(int, _version.split('.')))
+
+
 class Resource(BaseResource):
     def save(self):
         if self.pk is not None:
