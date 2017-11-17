@@ -3,7 +3,7 @@ import requests
 from genericclient_base import BaseEndpoint, BaseGenericClient, BaseResource, exceptions
 
 
-_version = "0.0.21"
+_version = "0.0.22"
 __version__ = VERSION = tuple(map(int, _version.split('.')))
 
 
