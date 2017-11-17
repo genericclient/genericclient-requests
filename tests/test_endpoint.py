@@ -53,6 +53,23 @@ class EndpointTestCase(TestCase):
             users = generic_client.users.filter(group="watchers")
             self.assertEqual(len(users), 2)
 
+        with responses.RequestsMock() as rsps:
+            rsps.add(responses.GET, MOCK_API_URL + '/users?group__in=watchers&group__in=contributors', json=[
+                {
+                    'id': 1,
+                    'username': 'user1',
+                    'group': 'watchers',
+                },
+                {
+                    'id': 2,
+                    'username': 'user2',
+                    'group': 'contributors',
+                },
+            ], match_querystring=True)
+
+            users = generic_client.users.filter(group__in=["watchers", "contributors"])
+            self.assertEqual(len(users), 2)
+
     def test_endpoint_get_id(self):
         with responses.RequestsMock() as rsps:
             rsps.add(responses.GET, MOCK_API_URL + '/users/2', json={
