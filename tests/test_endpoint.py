@@ -70,6 +70,29 @@ class EndpointTestCase(TestCase):
             users = generic_client.users.filter(group__in=["watchers", "contributors"])
             self.assertEqual(len(users), 2)
 
+    def test_endpoint_links(self):
+        with responses.RequestsMock() as rsps:
+            rsps.add('GET', MOCK_API_URL + '/users?page=2', json=[
+                {
+                    'id': 3,
+                    'username': 'user1',
+                    'group': 'watchers',
+                },
+                {
+                    'id': 4,
+                    'username': 'user2',
+                    'group': 'watchers',
+                },
+            ], match_querystring=True, headers={
+                'Link': '<http://example.com/users?page=3>; rel=next,<http://example.com/users?page=1>; rel=previous'
+            })
+
+            users = generic_client.users.filter(page=2)
+            self.assertEqual(users.response.links, {
+                'next': {'url': 'http://example.com/users?page=3', 'rel': 'next'},
+                'previous': {'url': 'http://example.com/users?page=1', 'rel': 'previous'}
+            })
+
     def test_endpoint_get_id(self):
         with responses.RequestsMock() as rsps:
             rsps.add(responses.GET, MOCK_API_URL + '/users/2', json={
