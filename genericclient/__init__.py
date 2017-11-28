@@ -37,11 +37,11 @@ class Endpoint(BaseEndpoint):
             if self.api.session.auth:
                 msg = "Failed request to `{}`. Cannot authenticate user `{}` on the API.".format(
                     url, self.api.session.auth[0],
-                ),
+                )
             else:
                 msg = "Failed request to `{}`. User is not authenticated.".format(
                     url,
-                ),
+                )
 
             raise exceptions.NotAuthenticatedError(
                 response, msg,
