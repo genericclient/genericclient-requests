@@ -173,7 +173,7 @@ Routes
 
 If your API has some non-RESTful calls within the main endpoints (sometimes referred as ``detail_route`` and ``list_route``), you can use ``genericclient`` to call them::
 
-    myclient.posts(id=123).publish(date=tomorrow), 
+    myclient.posts(id=123).publish(date=tomorrow)
 
 ::
 
@@ -182,7 +182,7 @@ If your API has some non-RESTful calls within the main endpoints (sometimes refe
 
 Routes http calls use ``POST`` by default, but you can specify something else by using the ``_method`` argument::
 
-    myclient.posts(_method='get', id=123).pingbacks(), 
+    myclient.posts(_method='get', id=123).pingbacks()
 
 ::
 
