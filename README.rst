@@ -7,6 +7,7 @@ genericclient
 
 A generic client for RESTful APIs based on ``requests``.
 
+For an async version based on ``aiohttp``, see `genericclient-aiohttp <https://github.com/genericclient/genericclient-aiohttp>`_ (Python 3.5+ only).
 
 Installation
 ============
@@ -188,7 +189,7 @@ Routes http calls use ``POST`` by default, but you can specify something else by
 
     myclient.blogs(_method='get').visits()
 
-Note that instead of instances of ``genericclient.Resource``, this calls will return an instance of ``requests.Response``.
+Note that this calls will return an instance of ``genericclient.ParsedResponse``, instead of instances of ``genericclient.Resource``,
 
 License
 =======
