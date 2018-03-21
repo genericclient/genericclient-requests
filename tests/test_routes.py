@@ -25,7 +25,7 @@ class EndpointTestCase(TestCase):
             )
 
             response = generic_client.users(id=2).notify(unread=3)
-            self.assertEqual(response.json(), {'unread': 3})
+            self.assertEqual(response.data, {'unread': 3})
 
         with responses.RequestsMock() as rsps:
             rsps.add_callback(
@@ -35,7 +35,7 @@ class EndpointTestCase(TestCase):
             )
 
             response = generic_client.users(_method='get', id=2).notify(unread=3)
-            self.assertEqual(response.json(), {'unread': 3})
+            self.assertEqual(response.data, {'unread': 3})
 
     def test_endpoint_list_route(self):
         with responses.RequestsMock() as rsps:
@@ -46,7 +46,7 @@ class EndpointTestCase(TestCase):
             )
 
             response = generic_client.users().notify(unread=3)
-            self.assertEqual(response.json(), {'unread': 3})
+            self.assertEqual(response.data, {'unread': 3})
 
         with responses.RequestsMock() as rsps:
             rsps.add_callback(
@@ -56,4 +56,4 @@ class EndpointTestCase(TestCase):
             )
 
             response = generic_client.users(_method='get').notify(unread=3)
-            self.assertEqual(response.json(), {'unread': 3})
+            self.assertEqual(response.data, {'unread': 3})
