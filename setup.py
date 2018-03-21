@@ -28,7 +28,7 @@ setup(
         'License :: OSI Approved :: MIT License',
     ],
     install_requires=[
-        "genericclient-base==0.0.4",
+        "genericclient-base==1.0.0",
         "requests>=2.13.0",
     ],
     test_suite='tests',

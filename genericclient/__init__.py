@@ -1,6 +1,8 @@
 import requests
 
-from genericclient_base import BaseEndpoint, BaseGenericClient, BaseResource, exceptions
+from genericclient_base import (
+    BaseEndpoint, BaseGenericClient, BaseResource, exceptions, ParsedResponse
+)
 
 
 _version = "0.0.23"
@@ -15,11 +17,9 @@ class Resource(BaseResource):
                 response = self._endpoint.request('put', url, json=self.payload)
             except exceptions.BadRequestError:
                 response = self._endpoint.request('patch', url, json=self.payload)
-            results = self._endpoint.api.hydrate_json(response)
         else:
             response = self._endpoint.request('post', url, json=self.payload)
-            results = self._endpoint.api.hydrate_json(response)
-        self.payload = results
+        self.payload = response.data
         return self
 
     def delete(self):
@@ -31,9 +31,14 @@ class Endpoint(BaseEndpoint):
     resource_class = Resource
 
     def request(self, method, url, *args, **kwargs):
-        response = getattr(self.api.session, method)(url, *args, **kwargs)
+        resp = getattr(self.api.session, method)(url, *args, **kwargs)
+        response = ParsedResponse(
+            status_code=resp.status_code,
+            headers=resp.headers,
+            data=self.api.hydrate_data(resp),
+        )
 
-        if self.status_code(response) == 403:
+        if response.status_code == 403:
             if self.api.session.auth:
                 msg = "Failed request to `{}`. Cannot authenticate user `{}` on the API.".format(
                     url, self.api.session.auth[0],
@@ -46,10 +51,10 @@ class Endpoint(BaseEndpoint):
             raise exceptions.NotAuthenticatedError(
                 response, msg,
             )
-        elif self.status_code(response) == 400:
+        elif response.status_code == 400:
             raise exceptions.BadRequestError(
                 response,
-                "Bad Request 400: {}".format(response.text)
+                "Bad Request 400: {}".format(response.data)
             )
         return response
 
@@ -59,19 +64,20 @@ class GenericClient(BaseGenericClient):
 
     def __init__(self, url, auth=None, session=None, adapter=None, trailing_slash=False):
         super(GenericClient, self).__init__(url, auth, session, trailing_slash)
+        self.adapter = adapter
 
-        if adapter is not None:
-            self.session.mount(url, adapter())
-
-    def set_session(self, session, auth):
-        if session is None:
-            session = requests.session()
-        if auth is not None:
-            session.auth = auth
+    def make_session(self):
+        session = requests.session()
+        if self.auth is not None:
+            session.auth = self.auth
         session.headers.update({'Content-Type': 'application/json'})
+        if self.adapter is not None:
+            session.mount(self.url, self.adapter())
         return session
 
-    def hydrate_json(self, response):
+    def hydrate_data(self, response):
+        if not response.text:
+            return None
         try:
             return response.json()
         except ValueError:
