@@ -10,21 +10,7 @@ __version__ = VERSION = tuple(map(int, _version.split('.')))
 
 
 class Resource(BaseResource):
-    def save(self):
-        if self.pk is not None:
-            url = self._urljoin(self.pk)
-            try:
-                response = self._endpoint.request('put', url, json=self.payload)
-            except exceptions.BadRequestError:
-                response = self._endpoint.request('patch', url, json=self.payload)
-        else:
-            response = self._endpoint.request('post', self._endpoint.url, json=self.payload)
-        self.payload = response.data
-        return self
-
-    def delete(self):
-        url = self._urljoin(self.pk)
-        self._endpoint.request('delete', url)
+    pass
 
 
 class Endpoint(BaseEndpoint):
@@ -62,8 +48,8 @@ class Endpoint(BaseEndpoint):
 class GenericClient(BaseGenericClient):
     endpoint_class = Endpoint
 
-    def __init__(self, url, auth=None, session=None, adapter=None, trailing_slash=False):
-        super(GenericClient, self).__init__(url, auth, session, trailing_slash)
+    def __init__(self, url, auth=None, session=None, adapter=None, trailing_slash=False, autopaginate=None):
+        super(GenericClient, self).__init__(url, auth, session, trailing_slash, autopaginate)
         self.adapter = adapter
 
     def make_session(self):

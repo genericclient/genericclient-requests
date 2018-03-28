@@ -38,7 +38,7 @@ Instantiation
 
 ::
 
-    myclient = GenericClient(url, auth=None, session=None, adapter=None, trailing_slash=False)
+    myclient = GenericClient(url, auth=None, session=None, adapter=None, trailing_slash=False, autopaginate=None)
 
 
 Arguments:
@@ -48,6 +48,7 @@ Arguments:
 * ``session``: Pass a session instance to have ``requests`` use that session. If ``None`` (the default), it will instantiate an instance of ``requests.session`` for you.
 * ``adapter``: optional session adapter for ``requests``.
 * ``trailing_slash``: You can set this to ``True`` if your API's URLs end with a ``/``
+* ``autopaginate``: You can set this to a callable to fetch all pages resulting from a request. Currently, the only callable included is ``genericclient.pagination.link_header``, which supports [RFC5988](https://tools.ietf.org/html/rfc5988).
 
 Endpoints
 ---------
