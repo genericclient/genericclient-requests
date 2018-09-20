@@ -170,6 +170,38 @@ Whenever a method returns a list of Resources, they list will be wrapped in a ``
 
 A ResultSet is a just a ``list`` object, with the addition of a ``.response`` containing the original response from the server.
 
+Customizing Endpoints and Resources
+-----------------------------------
+
+Resources can be customized by subclassing ``genericclient.Resource``.
+
+The most common reason is specifying the name of the primary key::
+
+    from genericclient import Resource
+
+
+    class PostResource(Resource):
+        pk_name = 'slug'
+
+
+Endpoints can be customized by subclassing ``genericclient.Endpoint``::
+
+    form genericclient import Endpoint
+
+
+    class PostEndpoint(Endpoint):
+        resource_class = PostResource
+
+
+You can then subclass ``genericclient.GenericClient`` to tell the client which endpoint classes to use on each endpoint::
+
+    from genericclient import GenericClient
+
+    class Client(GenericClient):
+        endpoint_classes = {
+            'posts': PostEndpoint,
+        }
+
 Routes
 ------
 
