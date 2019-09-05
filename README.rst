@@ -20,7 +20,7 @@ Installation
 Quickstart
 ==========
 
-::
+.. code:: python
 
     from genericclient import GenericClient
 
@@ -53,19 +53,28 @@ Arguments:
 Endpoints
 ---------
 
-Endpoints are available as properties on the main instance.
+Endpoints are available as properties and items on the main instance:
+
+.. code:: python
+
+    myclient.posts.all()  # GET /posts/
+    myclient["active-users"].all()  # GET /active-users/
 
 ``.all()``
 ~~~~~~~~~~
 
-Retrieves all resources (essentially a simple ``GET`` on the endpoint)::
+Retrieves all resources (essentially a simple ``GET`` on the endpoint):
+
+.. code:: python
 
     myclient.posts.all()  # GET /posts/
 
 ``.filter()``
 ~~~~~~~~~~~~~
 
-``.filter(**kwargs)`` calls a ``GET`` with ``kwargs`` as querystring values::
+``.filter(**kwargs)`` calls a ``GET`` with ``kwargs`` as querystring values:
+
+.. code:: python
 
     myclient.posts.filter(blog=12, status=1)  # GET /posts/?blog=12&status=1
 
@@ -85,7 +94,7 @@ If the returned list contains more than 1 resource, will raise ``MultipleResourc
 
 Note that ``.get()`` will return a ``Resource``, not a list of ``Resource`` s
 
-::
+.. code:: python
 
     myclient.posts.filter(blog=12, status=1)  # GET /posts/?blog=12&status=1
     myclient.posts.filter(id=12)  # GET /posts/12/
@@ -95,7 +104,9 @@ Note that ``.get()`` will return a ``Resource``, not a list of ``Resource`` s
 ~~~~~~~~~~~~~~~~~~~~
 
 Will result in a ``POST``, with ``payload`` (a ``dict``) as the request's body,
-returning a new ``Resource``::
+returning a new ``Resource``:
+
+.. code:: python
 
     post = myclient.posts.create({'blog': 12, 'status': 1})  # POST /posts/
 
@@ -103,7 +114,9 @@ returning a new ``Resource``::
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Issues a GET to fetch the resource. If the resource is not found, issues a POST
-to create the resource::
+to create the resource:
+
+.. code:: python
 
     # Assuming it doesn't exist
     post = myclient.posts.get_or_update(slug='my-post', defaults={'status': 1})  # GET /posts/my-post/, then POST /posts/
@@ -114,7 +127,9 @@ to create the resource::
 
 If ``payload`` contains a key called ``'id'``, will issue a ``PUT``. If the
 server returns a `400` error, a ``PATCH`` request will be re-issued.
-If `payload`` does not contains ``'id'``, it will issue a ``POST``::
+If `payload`` does not contains ``'id'``, it will issue a ``POST``:
+
+.. code:: python
 
     post = myclient.posts.create_or_update({'status': 1})  # POST /posts/
     post = myclient.posts.create_or_update({'id': 1234, 'status': 1})  # PUT /posts/1234/
@@ -126,7 +141,9 @@ If `payload`` does not contains ``'id'``, it will issue a ``POST``::
 ``.delete(pk)``
 ~~~~~~~~~~~~~~~
 
-Will issue a ``DELETE``, and will use ``pk`` as part of the URL::
+Will issue a ``DELETE``, and will use ``pk`` as part of the URL:
+
+.. code:: python
 
     myclient.posts.delete(24)  # DELETE /posts/24/
 
@@ -145,14 +162,18 @@ contains the original payload received from the server.
 ``Resource`` s have the following methods:
 
 ``Resource.delete()`` will result in a ``DELETE``, with ``Resource.id`` as
-par of the URL::
+par of the URL:
+
+.. code:: python
 
     blog = myclient.posts.create({'blog': 12, 'status': 1})  # POST /posts/
     blog.delete()  # DELETE /blog/345/ -- the ID 345 was returned by the server in the previous response
 
 ``Resource.save()`` will result in a ``PUT``, with ``Resource.id`` as
 par of the URL. If the
-server returns a `400` error, a ``PATCH`` request will be re-issued::
+server returns a `400` error, a ``PATCH`` request will be re-issued:
+
+.. code:: python
 
     post = myclient.posts.create({'blog': 12, 'status': 1})  # POST /posts/
     post.status = 2
@@ -175,7 +196,9 @@ Customizing Endpoints and Resources
 
 Resources can be customized by subclassing ``genericclient.Resource``.
 
-The most common reason is specifying the name of the primary key::
+The most common reason is specifying the name of the primary key:
+
+.. code:: python
 
     from genericclient import Resource
 
@@ -184,7 +207,9 @@ The most common reason is specifying the name of the primary key::
         pk_name = 'slug'
 
 
-Endpoints can be customized by subclassing ``genericclient.Endpoint``::
+Endpoints can be customized by subclassing ``genericclient.Endpoint``:
+
+.. code:: python
 
     form genericclient import Endpoint
 
@@ -193,7 +218,9 @@ Endpoints can be customized by subclassing ``genericclient.Endpoint``::
         resource_class = PostResource
 
 
-You can then subclass ``genericclient.GenericClient`` to tell the client which endpoint classes to use on each endpoint::
+You can then subclass ``genericclient.GenericClient`` to tell the client which endpoint classes to use on each endpoint:
+
+.. code:: python
 
     from genericclient import GenericClient
 
@@ -205,20 +232,24 @@ You can then subclass ``genericclient.GenericClient`` to tell the client which e
 Routes
 ------
 
-If your API has some non-RESTful calls within the main endpoints (sometimes referred as ``detail_route`` and ``list_route``), you can use ``genericclient`` to call them::
+If your API has some non-RESTful calls within the main endpoints (sometimes referred as ``detail_route`` and ``list_route``), you can use ``genericclient`` to call them:
+
+.. code:: python
 
     myclient.posts(id=123).publish(date=tomorrow)
 
-::
+.. code:: python
 
     myclient.blogs().ping() 
 
 
-Routes http calls use ``POST`` by default, but you can specify something else by using the ``_method`` argument::
+Routes http calls use ``POST`` by default, but you can specify something else by using the ``_method`` argument:
+
+.. code:: python
 
     myclient.posts(_method='get', id=123).pingbacks()
 
-::
+.. code:: python
 
     myclient.blogs(_method='get').visits()
 
