@@ -5,7 +5,7 @@ from genericclient_base import (
 )
 
 
-_version = "1.4.0"
+_version = "1.4.1"
 __version__ = VERSION = tuple(map(int, _version.split('.')))
 
 
