@@ -127,6 +127,12 @@ class EndpointTestCase(TestCase):
 
     def test_unauthenticated(self):
         with responses.RequestsMock() as rsps:
+            rsps.add(responses.GET, MOCK_API_URL + '/users', status=401)
+
+            with self.assertRaises(generic_client.NotAuthenticatedError):
+                generic_client.users.all()
+
+        with responses.RequestsMock() as rsps:
             rsps.add(responses.GET, MOCK_API_URL + '/users', status=403)
 
             with self.assertRaises(generic_client.NotAuthenticatedError):

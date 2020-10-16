@@ -24,7 +24,7 @@ class Endpoint(BaseEndpoint):
             data=self.api.hydrate_data(resp),
         )
 
-        if response.status_code == 403:
+        if response.status_code in (401, 403):
             if self.api.session.auth:
                 msg = "Failed request to `{}`. Cannot authenticate user `{}` on the API.".format(
                     url, self.api.session.auth[0],
